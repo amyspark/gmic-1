@@ -14175,9 +14175,9 @@ gmic& gmic::_run(const CImgList<char>& commands_line, unsigned int& position,
                   CImg<T> &img = images.size()?images.back():CImg<T>::empty();
                   const bool is_rounded = s_equal[1]=='_';
                   s = s_equal + 1 + (is_rounded?1:0);
-                  name.assign(std::strlen(s) + 3);
-                  *name = '['; name[name._width - 2] = ']'; name.back() = 0;
-                  std::memcpy(name.data() + 1,s,name.width() - 3);
+                  name.assign(std::strlen(s) + 4);
+                  *name = '['; name[1] = ';'; name[name._width - 2] = ']'; name.back() = 0;
+                  std::memcpy(name.data() + 2,s,name.width() - 4);
                   strreplace_fw(name);
                   try { img.eval(varvalues_d,name,0,0,0,0,&images); }
                   catch (CImgException &e) {

@@ -26512,9 +26512,9 @@ watermark_visible : check "${2=0.3}>0 && $2<1 && ${3=53}>0 && ${6=0.5}>=0"
 #@cli : divide | dodge | edges | exclusion | freeze | grainextract | grainmerge | green | hardlight |
 #@cli : hardmix | hue | interpolation | lchlightness | lighten | lightness | linearburn | linearlight | luminance |
 #@cli : multiply | negation | or | overlay | pinlight | red | reflect | saturation |
-#@cli : screen | shapeareamax | shapeareamax0 | shapeareamin | shapeareamin0 | shapeaverage | shapeaverage0 |
-#@cli : shapemedian | shapemedian0 | shapemin | shapemin0 | shapemax | shapemax0 | softburn | softdodge |
-#@cli : softlight | stamp | subtract | value | vividlight | xor }.
+#@cli : screen | seamless | seamless_mixed | shapeareamax | shapeareamax0 | shapeareamin | shapeareamin0 |
+#@clo : shapeaverage | shapeaverage0 | shapemedian | shapemedian0 | shapemin | shapemin0 | shapemax | shapemax0 |
+#@cli : softburn | softdodge | softlight | stamp | subtract | value | vividlight | xor }.
 #@cli : 'opacity' must be in range '[0,1]' (or '[0%,100%]').
 #@cli : Default values: 'blending_mode=alpha', 'opacity=1' and 'selection_is=0'.
 #@cli : $ image.jpg +drop_shadow , resize2dy[-1] 200 rotate[-1] 20 +blend alpha display_rgba[-2]
@@ -26557,19 +26557,23 @@ blend : check "isbool(${4=0}) && isin(${5=1},0,1,2)" skip "${1=alpha},${2=1},${3
     to_colormode[1] {$nb_col_channels+$is_alpha_f}
     if $opacity<1 sh[1] 100% *. $opacity rm. fi
     r[1] [0],[0],[0],100%,0,0,0.5,0.5
-    s[0,1] c,-$nb_col_channels
-    if $is_alpha_b # Background has alpha
-      _$0_$2[0,2]
-      if $is_alpha_f # Foreground has alpha
-        *[0] [1] /[0] 255 j[0] [2],0,0,0,0,1,[3],255 # Co = Cf*Af + Cb*Ab*(1-Af)
-        +f. 255 j[1] .,0,0,0,0,1,[3],255 # Ao = Af + Ab*(1 - Af)
-        k[0,1] +max. 1 /. 255 /[0,-1] a c # [ Co/Ao, Ao ]
-      else j[0] [2],0,0,0,0,1 rm. f. 255 a c # Foreground has no alpha
-      fi
-    else # Background has no alpha
-      _$0_$2[0,1]
-      if $is_alpha_f j[0] [1],0,0,0,0,1,.,255 k[0] # Foreground has alpha
-      else k[1] # Foreground has no alpha
+    if ['$2']=='seamless' blend_seamless 0
+    elif ['$2']=='seamless_mixed' blend_seamless 1
+    else
+      s[0,1] c,-$nb_col_channels
+      if $is_alpha_b # Background has alpha
+        _$0_$2[0,2]
+        if $is_alpha_f # Foreground has alpha
+          *[0] [1] /[0] 255 j[0] [2],0,0,0,0,1,[3],255 # Co = Cf*Af + Cb*Ab*(1-Af)
+          +f. 255 j[1] .,0,0,0,0,1,[3],255 # Ao = Af + Ab*(1 - Af)
+          k[0,1] +max. 1 /. 255 /[0,-1] a c # [ Co/Ao, Ao ]
+        else j[0] [2],0,0,0,0,1 rm. f. 255 a c # Foreground has no alpha
+        fi
+      else # Background has no alpha
+        _$0_$2[0,1]
+        if $is_alpha_f j[0] [1],0,0,0,0,1,.,255 k[0] # Foreground has alpha
+        else k[1] # Foreground has no alpha
+        fi
       fi
     fi
   }

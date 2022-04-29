@@ -297,7 +297,7 @@ if [ "$size" != "0" ]; then
 fi
 update_filename=$HOME/.config/gmic/update${VERSION}.gmic
 update_filenamez=$HOME/.config/gmic/update${VERSION}.gmicz
-gmic it $update_filename o cimgz:$update_filenamez,uchar
+gmic it $update_filename o cimgz:$update_filenamez,uint8
 
 # Create default command file.
 #-----------------------------
